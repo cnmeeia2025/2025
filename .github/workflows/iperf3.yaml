@@ -15,29 +15,24 @@ jobs:
 
     - name: Clone the external repository
       run: |
-        REPO_URL="https://github.com/webtor-io/self-hosted.git"  
-        REPO_NAME=$(basename $REPO_URL .git)  
-        echo "Cloning repository: self-hosted"
-        git clone $REPO_URL  
+
+        git clone https://github.com/webtor-io/self-hosted.git 
         cd self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Set up QEMU for ARM64
-      uses: docker/setup-qemu-action@v2  
-
-    - name: Build ARM64 Docker image
-      run: |
-        docker buildx build --platform linux/arm64 -t self-hosted . --load  
-
-    - name: Save Docker image as tar
-      run: |
-        docker save -o self-hosted-hosted.tar  
-
-
-    - name: Upload Docker image artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: self-hosted  
-        path: self-hosted.tar  
+      - name: Build the Docker image
+        run: |
+          docker buildx build --platform linux/amd64 -t self-hosted --load .
+      - name: Save Docker image as tar
+        run: |
+          docker save self-hosted -o self-hosted.tar
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-hosted
+          path: self-hosted.tar 
