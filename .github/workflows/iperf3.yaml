@@ -34,6 +34,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
-    - name: Build and push ARM64 Docker image
+    - name: Build ARM64 Docker image
       run: |
-        docker buildx build --platform linux/arm64 -t mick2019/your-image-name:latest . --push  # 构建并推送 ARM64 镜像
+        set -e  # 如果命令返回非零状态，立即退出
+        IMAGE_TAG="mick2019/$REPO_NAME:latest"  # 镜像标签
+        docker buildx build --platform linux/arm64 -t $IMAGE_TAG . --load  # 构建 ARM64 镜像并加载到本地
+
+    - name: Save Docker image as tar
+      run: |
+        IMAGE_TAR="$REPO_NAME.tar"
+        docker save -o $IMAGE_TAR $IMAGE_TAG  # 将 Docker 镜像保存为 tar 文件
+        echo "Docker image saved as $IMAGE_TAR"
+
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: $REPO_NAME  # 使用仓库名作为工件名称
+        path: $REPO_NAME.tar  # 上传的 tar 文件路径
