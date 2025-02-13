@@ -29,7 +29,7 @@ jobs:
         uses: docker/setup-qemu-action@v3 # 升級到 v3 版本
 
       - name: 快取 Docker layers
-        uses: actions/cache@v4 # 升級到 v4 版本
+        uses: actions/cache@vv4 # 升級到 v4 版本
         id: cache-docker # 為 step 設定 ID
         with:
           path: /tmp/.buildx-cache
