@@ -15,24 +15,28 @@ jobs:
 
     - name: Clone the external repository
       run: |
-
         git clone https://github.com/webtor-io/self-hosted.git 
         cd self-hosted
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Checkout code from the cloned repo
+      run: |
+        cd self-hosted
+        git checkout main  
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-      - name: Build the Docker image
-        run: |
-          docker buildx build --platform linux/amd64 -t self-hosted --load .
-      - name: Save Docker image as tar
-        run: |
-          docker save self-hosted -o self-hosted.tar
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: self-hosted
-          path: self-hosted.tar 
+    - name: Build the Docker image
+      run: |
+        cd self-hosted
+        docker buildx build --platform linux/arm64 -t self-hosted --load .
+
+    - name: Save Docker image as tar
+      run: |
+        docker save self-hosted -o self-hosted.tar
+
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: self-hosted
+        path: self-hosted.tar
