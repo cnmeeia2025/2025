@@ -3,53 +3,41 @@ name: Build ARM64 Docker Image from Another Repo
 on:
   push:
     branches:
-      - main  # 或者你想要触发构建的分支
+      - main  
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 使用 GitHub 提供的 Ubuntu 环境
+    runs-on: ubuntu-latest  
 
     steps:
     - name: Checkout the current repo
-      uses: actions/checkout@v2  # 克隆当前仓库
+      uses: actions/checkout@v2  
 
     - name: Clone the external repository
       run: |
-        REPO_URL="https://github.com/webtor-io/self-hosted.git"  # 目标仓库 URL
-        REPO_NAME=$(basename $REPO_URL .git)  # 提取仓库名
-        echo "Cloning repository: $REPO_NAME"
-        git clone $REPO_URL  # 克隆仓库
-        cd $REPO_NAME  # 进入仓库文件夹
+        REPO_URL="https://github.com/webtor-io/self-hosted.git"  
+        REPO_NAME=$(basename $REPO_URL .git)  
+        echo "Cloning repository: self-hosted"
+        git clone $REPO_URL  
+        cd self-hosted
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2  # 设置 Buildx，支持多平台构建
+      uses: docker/setup-buildx-action@v2  
 
     - name: Set up QEMU for ARM64
-      uses: docker/setup-qemu-action@v2  # 设置 QEMU，以支持 ARM64 模拟
-
-    - name: Cache Docker layers
-      uses: actions/cache@v2  # 缓存 Docker layers，避免每次构建都从头开始
-      with:
-        path: /tmp/.buildx-cache  # 缓存路径
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+      uses: docker/setup-qemu-action@v2  
 
     - name: Build ARM64 Docker image
       run: |
-        set -e  # 如果命令返回非零状态，立即退出
-        IMAGE_TAG="mick2019/$REPO_NAME:latest"  # 镜像标签
-        echo "Building Docker image with tag: $IMAGE_TAG"
-        docker buildx build --platform linux/arm64 -t $IMAGE_TAG . --load  # 构建 ARM64 镜像并加载到本地
+        docker buildx build --platform linux/arm64 -t self-hosted . --load  
 
     - name: Save Docker image as tar
       run: |
-        IMAGE_TAR="$REPO_NAME.tar"
-        docker save -o $IMAGE_TAR $IMAGE_TAG  # 将 Docker 镜像保存为 tar 文件
-        echo "Docker image saved as $IMAGE_TAR"
+        docker save -o self-hosted-hosted.tar  
+
 
     - name: Upload Docker image artifact
       uses: actions/upload-artifact@v4
       with:
-        name: $REPO_NAME  # 使用仓库名作为工件名称
-        path: $REPO_NAME.tar  # 上传的 tar 文件路径
+        name: self-hosted  
+        path: self-hosted.tar  
