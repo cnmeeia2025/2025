@@ -36,18 +36,15 @@ jobs:
 
     - name: Build ARM64 Docker image
       run: |
-        set -e  # 如果命令返回非零状态，立即退出
-        IMAGE_TAG="mick2019/$REPO_NAME:latest"  # 镜像标签
-        docker buildx build --platform linux/arm64 -t $IMAGE_TAG . --load  # 构建 ARM64 镜像并加载到本地
+        docker buildx build --platform linux/arm64 -t self . --load  # 构建 ARM64 镜像并加载到本地
 
     - name: Save Docker image as tar
       run: |
         IMAGE_TAR="$REPO_NAME.tar"
-        docker save -o $IMAGE_TAR $IMAGE_TAG  # 将 Docker 镜像保存为 tar 文件
-        echo "Docker image saved as $IMAGE_TAR"
+        docker save -o  self  # 将 Docker 镜像保存为 tar 文件
 
     - name: Upload Docker image artifact
       uses: actions/upload-artifact@v4
       with:
-        name: $REPO_NAME  # 使用仓库名作为工件名称
-        path: $REPO_NAME.tar  # 上传的 tar 文件路径
+        name: self  # 使用仓库名作为工件名称
+        path: self.tar  # 上传的 tar 文件路径
